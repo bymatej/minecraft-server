@@ -31,7 +31,7 @@ install_vanilla() {
     python3 /scripts/download_minecraft_vanilla.py
     touch /McMyAdmin/Minecraft/.vanillaInstalled
     echo "***** Vanilla installation done!" ; else
-      echo  "***** Minecraft Forge is already installed."
+      echo  "***** Minecraft Vanilla is already installed."
   fi
 }
 
@@ -49,6 +49,18 @@ install_spigot() {
     touch /McMyAdmin/Minecraft/spigot/.buildSuccess
     echo "***** Spigot installation done!" ; else
       echo  "***** Spigot is already installed."
+  fi
+}
+
+install_paper() {
+  # Install Paper if required
+  export SERVER_TYPE=Official
+  if [ ! -f /McMyAdmin/Minecraft/.paperInstalled ] ; then
+    echo "***** Installing Paper"
+    python3 /scripts/download_minecraft_paper.py
+    touch /McMyAdmin/Minecraft/.paperInstalled
+    echo "***** Paper installation done!" ; else
+      echo  "***** Minecraft Paper is already installed."
   fi
 }
 
@@ -73,6 +85,9 @@ case ${MINECRAFT_FLAVOR^^} in
     ;;
     SPIGOT )
         install_spigot
+    ;;
+    PAPER )
+        install_paper
     ;;
     FORGE )
         install_forge

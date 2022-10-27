@@ -1,7 +1,7 @@
 # minecraft-server
 A Minecraft server with: 
 - McMyAdmin
-- Ability to specify Mod/Flavor (Vanilla, Spigot, Forge) with ability to specify the Minecraft version
+- Ability to specify Mod/Flavor (Vanilla, Spigot, Paper, Forge) with ability to specify the Minecraft version
 - Fully configurable using environment variables
 - Volume to access all the configuration files later on
 
@@ -158,6 +158,7 @@ Specify the mod using `MINECRAFT_FLAVOR` environment variable.
 Options for the variable are: 
 - `Vanilla`
 - `Spigot`
+- `Paper`
 - `Forge`
 
 You can also specify the Minecraft version (`1.12.2`, `1.14`, etc.) using the `MINECRAFT_FLAVOR` variable. 
@@ -182,6 +183,13 @@ Available versions are outlined here: https://www.spigotmc.org/wiki/buildtools/
 **Important**: Spigot is built on the first start of the container. 
 This take a lot of time, so be patient. 
 Check the container log by using `docker logs` command. Once you are past "Installing Spigot" the container will soon finish its entrypoint commands and your McMyAdmin will be ready.
+
+### Paper
+This is Paper: https://papermc.io/
+To use Paper build, the `MINECRAFT_FLAVOR` should be set to `Paper`.
+
+The environment variable `MINECRAFT_VERSION` is used when building Paper jar file.
+Available versions are outlined here: https://papermc.io/downloads
 
 ### Forge
 This is Forge: http://files.minecraftforge.net/
@@ -280,6 +288,7 @@ Resources and technologies used:
 - McMyAdmin: https://mcmyadmin.com/
 - Minecraft server: https://mcversions.net/
 - Spigot: https://www.spigotmc.org/
+- Paper: https://papermc.io/
 - Forge: http://files.minecraftforge.net/
 - Java: https://www.java.com/
 - Docker: https://www.docker.com/
