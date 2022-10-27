@@ -112,13 +112,13 @@ RUN echo "***** Setting JAVA_HOME environment variable" && \
 
 # Download and install Mono for McMyAdmin
 WORKDIR /usr/local
-RUN wget http://mcmyadmin.com/Downloads/etc.zip && \
+RUN wget http://mcmyadmin.com/Downloads/etc.zip --no-check-certificate && \
     unzip etc.zip && \
     rm etc.zip
 
 # Download McMyAdmin
 WORKDIR /McMyAdmin
-RUN wget http://mcmyadmin.com/Downloads/MCMA2_glibc26_2.zip && \
+RUN wget http://mcmyadmin.com/Downloads/MCMA2_glibc26_2.zip --no-check-certificate && \
     unzip MCMA2_glibc26_2.zip && \
     rm MCMA2_glibc26_2.zip
 
@@ -136,7 +136,7 @@ ADD scripts/configure_mcma.py /scripts/
 # Download Spigot BuildTools
 WORKDIR /McMyAdmin/Minecraft/spigot/
 RUN echo "***** Downloading Spigot BuildTools. Installation will happen on container start." && \
-    wget -O BuildTools.jar https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+    wget -O BuildTools.jar https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar --no-check-certificate
 
 # Add default Minecraft server.properties
 ADD files/server.properties /McMyAdmin/Minecraft/server.properties
