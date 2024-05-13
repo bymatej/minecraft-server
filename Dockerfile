@@ -1,11 +1,11 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 LABEL maintainer="programming@bymatej.com"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Environment variables used for setting up the system
-ENV JAVA_MAJOR_VERSION=16
+ENV JAVA_MAJOR_VERSION=17
 
 # Environment variables used for Mod installation
 ENV MINECRAFT_FLAVOR="Vanilla"
@@ -75,7 +75,7 @@ ENV ENABLE_JMX_MONITORING=false \
 # Update and install required software and tools
 RUN echo "***** Updating and installing required software and tools" && \
     apt --assume-yes update && \
-    apt --assume-yes install openjdk-$JAVA_MAJOR_VERSION-jdk-headless \
+    apt --assume-yes install openjdk-$JAVA_MAJOR_VERSION-jre-headless \
                              wget \
                              zip \
                              unzip \
@@ -88,12 +88,22 @@ RUN echo "***** Updating and installing required software and tools" && \
                              screen \
                              dumb-init \
                              gosu \
-                             firefox-geckodriver \
+                             firefox \
                              nano
+
+# Download gecko driver
+RUN mkdir geckodriver && \
+    cd geckodriver && \
+    ls -lah && pwd && \
+    wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz && \
+    tar -xvzf geckodriver* -C . && \
+    chmod +x geckodriver && \
+    export PATH=$PATH:. && \
+    cd ..
 
 # Install Python dependencies
 ADD scripts/requirements.txt /scripts/requirements.txt
-RUN pip3 install -r /scripts/requirements.txt
+RUN pip3 install -r /scripts/requirements.txt --break-system-packages
 
 # General system setup
 RUN echo "***** Running general system setup" && \

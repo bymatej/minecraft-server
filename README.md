@@ -144,13 +144,24 @@ Custom values are passed using environment variables on `docker run` command usi
 Example: `-e MCMA_PASSWORD=xyz`
 
 ## Java version
-You can specify the major Java version (8, 11, etc.). Recommended and default value is `8`. 
+You can specify the major Java version (8, 11, etc.). Recommended and default value is `17`. 
 You may specify `11` if your plugins need that exact version. 
-Specifying an invalid value will cause errors and nothing will work.
+Specifying an invalid value will cause errors and nothing will work. 
+The java is obtained by running `apt install openjdk-$JAVA_MAJOR_VERSION-jre-headless` 
+where `$JAVA_MAJOR_VERSION` is a version specified. For `17` it will install 
+`apt install openjdk-17-jre-headless`.
 
-| Variable           | Default value | Description                                                            |
-| ------------------ | ------------- | ---------------------------------------------------------------------- |
-| JAVA_MAJOR_VERSION | 8             | Java major version                                                     |
+| Variable           | Default value | Description        |
+|--------------------|---------------|--------------------|
+| JAVA_MAJOR_VERSION | 17            | Java major version |
+
+### Which version do I need?
+| Minecraft version | Recommended Java version |
+|-------------------|--------------------------|
+| 1.8 to 1.11	      | Java 8                   |
+| 1.12 to 1.16.4	   | Java 11                  |
+| 1.16.5	           | Java 16                  |
+| 1.17.1-1.20.6+	   | Java 17                  |
 
 ## Mod settings
 This is only if you want to use Modded version of Minecraft.
@@ -290,7 +301,7 @@ Resources and technologies used:
 - Spigot: https://www.spigotmc.org/
 - Paper: https://papermc.io/
 - Forge: http://files.minecraftforge.net/
-- Java: https://www.java.com/
+- Java: https://www.java.com/ (adoptopenjdk)
 - Docker: https://www.docker.com/
 - Bash: https://www.gnu.org/software/bash/
 - Ubuntu: https://ubuntu.com/

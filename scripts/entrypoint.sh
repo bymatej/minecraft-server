@@ -11,7 +11,7 @@ install_java() {
 
   # Install java
   echo "Installing Java version $JAVA_MAJOR_VERSION"
-  apt -y install openjdk-"$JAVA_MAJOR_VERSION"-jdk-headless
+  apt -y install openjdk-"$JAVA_MAJOR_VERSION"-jre-headless
 
   # Set JAVA_HOME environment variable
   JAVA_HOME="/usr/lib/jvm/java-${JAVA_MAJOR_VERSION}-openjdk-amd64/jre/bin/java"
