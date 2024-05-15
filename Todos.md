@@ -16,6 +16,9 @@ The problem is - it needs a service running on host. Then you can use their dock
 I don't like this. Maybe the docker-compose may help.
 I don't have the time for this now...
 
+## Shrink this image
+Image is too large. Use smaller base image, and utilize multi-staged build, and other tricks to make the image smaller in the end.
+
 ## Delete this document
 It is useful only during the development.
 
@@ -86,4 +89,19 @@ docker run -d \
 Remove
 ```
 docker stop mc && docker rm mc && docker image rm mc && docker images prune && docker volume rm mc
+```
+
+### Push to docker hub
+Go to repository root and execute the following:  
+
+```shell
+docker build -t bymatej/minecraft-server .
+```
+
+```shell
+docker login
+```
+
+```shell
+docker push bymatej/minecraft-server:latest
 ```
