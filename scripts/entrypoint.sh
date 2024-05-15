@@ -11,7 +11,7 @@ install_java() {
 
   # Install java
   echo "Installing Java version $JAVA_MAJOR_VERSION"
-  apt -y install openjdk-"$JAVA_MAJOR_VERSION"-jdk-headless
+  apt -y install openjdk-"$JAVA_MAJOR_VERSION"-jre-headless
 
   # Set JAVA_HOME environment variable
   JAVA_HOME="/usr/lib/jvm/java-${JAVA_MAJOR_VERSION}-openjdk-amd64/jre/bin/java"
@@ -26,6 +26,8 @@ install_java() {
 install_vanilla() {
   # Install vanilla if required
   export SERVER_TYPE=Official
+  Xvfb &
+  export DISPLAY=:0
   if [ ! -f /McMyAdmin/Minecraft/.vanillaInstalled ] ; then
     echo "***** Installing Vanilla"
     python3 /scripts/download_minecraft_vanilla.py
@@ -66,6 +68,8 @@ install_paper() {
 
 install_forge() {
   export SERVER_TYPE=Forge
+  Xvfb &
+  export DISPLAY=:0
   # Install Forge if required
   if [ ! -f /McMyAdmin/Minecraft/ForgeMod.jar ] ; then
     echo "***** Installing Forge"

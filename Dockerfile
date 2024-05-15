@@ -1,11 +1,11 @@
-FROM ubuntu:20.04
+FROM debian:bookworm
 
 LABEL maintainer="programming@bymatej.com"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Environment variables used for setting up the system
-ENV JAVA_MAJOR_VERSION=16
+ENV JAVA_MAJOR_VERSION=17
 
 # Environment variables used for Mod installation
 ENV MINECRAFT_FLAVOR="Vanilla"
@@ -72,10 +72,15 @@ ENV ENABLE_JMX_MONITORING=false \
     SPAWN_PROTECTION=16 \
     MAX_WORLD_SIZE=29999984
 
+# Setup gecko driver
+ADD chromedriver /chromedriver/chromedriver
+RUN chmod a+x /chromedriver/chromedriver && \
+    export PATH=$PATH:/chromedriver
+
 # Update and install required software and tools
 RUN echo "***** Updating and installing required software and tools" && \
     apt --assume-yes update && \
-    apt --assume-yes install openjdk-$JAVA_MAJOR_VERSION-jdk-headless \
+    apt --assume-yes install openjdk-$JAVA_MAJOR_VERSION-jre-headless \
                              wget \
                              zip \
                              unzip \
@@ -88,12 +93,14 @@ RUN echo "***** Updating and installing required software and tools" && \
                              screen \
                              dumb-init \
                              gosu \
-                             firefox-geckodriver \
-                             nano
+                             chromium \
+                             nano \
+                             mono-complete \
+                             xvfb
 
 # Install Python dependencies
 ADD scripts/requirements.txt /scripts/requirements.txt
-RUN pip3 install -r /scripts/requirements.txt
+RUN pip3 install -r /scripts/requirements.txt --break-system-packages
 
 # General system setup
 RUN echo "***** Running general system setup" && \

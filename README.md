@@ -14,9 +14,13 @@ I created this for my own personal use. I use it for fun on my "hacked" server.
 If you are not happy with the solution provided here, do one of the following: 
 - Create a pull request with desired changes on this project and I will consider it
 - Fork this project and modify it
-- Write me an email at programming@bymatej.com and tell me what would you like me to change (don't expect me to do it if I don't think it's worth it, or if I don't find the time to do it)
+- Write me an email at matej.jelic92@gmail.com and tell me what would you like me to change (don't expect me to do it if I don't think it's worth it, or if I don't find the time to do it)
 - Use it the way I use it and don't complain
 - Check other solutions, like this one, for example: https://github.com/tekgator/docker-mcmyadmin
+
+Also, this is a bit of a Frankenstein when it comes to tech stack. A bit of python, a bit of bash, all intentionally for learning purposes. :) 
+
+I have no intention in maintaining this.
 
 # System requirements
 This heavily depends on: 
@@ -27,10 +31,12 @@ This heavily depends on:
 Here are the recommendations: https://minecraft.gamepedia.com/Server/Requirements/Dedicated#Console
 
 My server: 
-- Lenovo Q190 (an old mini desktop PC)
-- 320 GB HDD (not SSD, unfortunately)
-- 4GB RAM (1600 MHz)
-- Intel Celeron CPU 1017U @ 1.60GHz (Dual Core)
+- [Contabo VPS](https://contabo.com/en/vps/) (CLOUD VPS 2)
+- CPU: 6 vCPU Cores
+- RAM: 16 GB
+- Storage: 400 GB (SSD)
+
+I run other services there, not just Minecraft, so not all resources are available to Minecraft.
 
 So, it is a pretty low-end machine.
 I would recommend at least 2GB of RAM for the McMyAdmin (set using the `JAVA_MEMORY` environment variable).
@@ -144,13 +150,24 @@ Custom values are passed using environment variables on `docker run` command usi
 Example: `-e MCMA_PASSWORD=xyz`
 
 ## Java version
-You can specify the major Java version (8, 11, etc.). Recommended and default value is `8`. 
+You can specify the major Java version (8, 11, etc.). Recommended and default value is `17`. 
 You may specify `11` if your plugins need that exact version. 
-Specifying an invalid value will cause errors and nothing will work.
+Specifying an invalid value will cause errors and nothing will work. 
+The java is obtained by running `apt install openjdk-$JAVA_MAJOR_VERSION-jre-headless` 
+where `$JAVA_MAJOR_VERSION` is a version specified. For `17` it will install 
+`apt install openjdk-17-jre-headless`.
 
-| Variable           | Default value | Description                                                            |
-| ------------------ | ------------- | ---------------------------------------------------------------------- |
-| JAVA_MAJOR_VERSION | 8             | Java major version                                                     |
+| Variable           | Default value | Description        |
+|--------------------|---------------|--------------------|
+| JAVA_MAJOR_VERSION | 17            | Java major version |
+
+### Which version do I need?
+| Minecraft version | Recommended Java version |
+|-------------------|--------------------------|
+| 1.8 to 1.11	      | Java 8                   |
+| 1.12 to 1.16.4	   | Java 11                  |
+| 1.16.5	           | Java 16                  |
+| 1.17.1-1.20.6+	   | Java 17                  |
 
 ## Mod settings
 This is only if you want to use Modded version of Minecraft.
@@ -290,7 +307,7 @@ Resources and technologies used:
 - Spigot: https://www.spigotmc.org/
 - Paper: https://papermc.io/
 - Forge: http://files.minecraftforge.net/
-- Java: https://www.java.com/
+- Java: https://www.java.com/ (adoptopenjdk)
 - Docker: https://www.docker.com/
 - Bash: https://www.gnu.org/software/bash/
 - Ubuntu: https://ubuntu.com/
