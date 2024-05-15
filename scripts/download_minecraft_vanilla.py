@@ -1,11 +1,14 @@
 import os
+import traceback
 from time import sleep
 
+from selenium.webdriver.common.by import By
+
 from common.bash_utils import execute_bash_commands
-from common.web_utils import get_firefox_browser
+from common.web_utils import get_browser
 
 # Get browser
-browser = get_firefox_browser()
+browser = get_browser()
 
 
 def get_latest_download_link() -> str:
@@ -14,23 +17,10 @@ def get_latest_download_link() -> str:
     browser.get(url)
     sleep(5)
 
-    releases_rows_xpath = "//div[contains(@class, 'versions')]//div//h5"
-    releases_rows_elements = browser.find_elements_by_xpath(releases_rows_xpath)
-    for row in releases_rows_elements:
-        if "stable releases" in str(row.text).lower():
-            latest_release_mark_xpath = ".." \
-                                        "//div[contains(@class, 'items')]" \
-                                        "//div[contains(@class, 'item')]" \
-                                        "//div[contains(@class, 'info')]" \
-                                        "//span[contains(@class, 'latest')]"
-            latest_release_mark_element = row.find_element_by_xpath(latest_release_mark_xpath)
-            if "latest release" in str(latest_release_mark_element.text).lower():
-                latest_release_download_link_xpath = ".." \
-                                                     "//.." \
-                                                     "//a[contains(@class, 'button')]"
-                latest_release_download_link_element = latest_release_mark_element \
-                    .find_element_by_xpath(latest_release_download_link_xpath)
-                return f"{url}{str(latest_release_download_link_element.get_attribute('href'))}"
+    latest_release_p_element_xpath = "//span[text()='Latest Release']/parent::div/p[1]"
+    latest_release_p_element = browser.find_element(By.XPATH, latest_release_p_element_xpath)
+    latest_version = latest_release_p_element.text.split("\n")[0].replace("✨", "")
+    return f"https://mcversions.net/download/{latest_version}"
 
 
 def get_version_download_link() -> str:
@@ -49,7 +39,7 @@ def get_direct_download_link() -> str:
     browser.get(download_link)
     sleep(5)
 
-    for a in browser.find_elements_by_tag_name("a"):
+    for a in browser.find_elements(By.TAG_NAME, "a"):
         if str(a.get_attribute("download")).startswith("minecraft_server-"):
             return str(a.get_attribute("href"))
 
@@ -67,10 +57,11 @@ try:
         ["wget", "-O", file_path, direct_download_link]
     ]
     execute_bash_commands(commands)
-except:
+except Exception as e:
     # PEP 8: E722 do not use bare 'except'
     # I am such a hooligan for not following the rules
     print("***** An error occurred!")
+    traceback.print_exc()
 finally:
     # Close browser
     browser.quit()

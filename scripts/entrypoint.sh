@@ -26,6 +26,8 @@ install_java() {
 install_vanilla() {
   # Install vanilla if required
   export SERVER_TYPE=Official
+  Xvfb &
+  export DISPLAY=:0
   if [ ! -f /McMyAdmin/Minecraft/.vanillaInstalled ] ; then
     echo "***** Installing Vanilla"
     python3 /scripts/download_minecraft_vanilla.py
@@ -66,6 +68,8 @@ install_paper() {
 
 install_forge() {
   export SERVER_TYPE=Forge
+  Xvfb &
+  export DISPLAY=:0
   # Install Forge if required
   if [ ! -f /McMyAdmin/Minecraft/ForgeMod.jar ] ; then
     echo "***** Installing Forge"

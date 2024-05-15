@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM debian:bookworm
 
 LABEL maintainer="programming@bymatej.com"
 
@@ -72,6 +72,11 @@ ENV ENABLE_JMX_MONITORING=false \
     SPAWN_PROTECTION=16 \
     MAX_WORLD_SIZE=29999984
 
+# Setup gecko driver
+ADD chromedriver /chromedriver/chromedriver
+RUN chmod a+x /chromedriver/chromedriver && \
+    export PATH=$PATH:/chromedriver
+
 # Update and install required software and tools
 RUN echo "***** Updating and installing required software and tools" && \
     apt --assume-yes update && \
@@ -88,18 +93,10 @@ RUN echo "***** Updating and installing required software and tools" && \
                              screen \
                              dumb-init \
                              gosu \
-                             firefox \
-                             nano
-
-# Download gecko driver
-RUN mkdir geckodriver && \
-    cd geckodriver && \
-    ls -lah && pwd && \
-    wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz && \
-    tar -xvzf geckodriver* -C . && \
-    chmod +x geckodriver && \
-    export PATH=$PATH:. && \
-    cd ..
+                             chromium \
+                             nano \
+                             mono-complete \
+                             xvfb
 
 # Install Python dependencies
 ADD scripts/requirements.txt /scripts/requirements.txt
