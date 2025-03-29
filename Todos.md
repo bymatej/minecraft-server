@@ -53,13 +53,13 @@ docker image rm mc
 ```
 
 ```
-docker images prune
+docker image prune
 ```
 
 ## All in one
 ### Development
 ```
-docker stop mc && docker rm mc && docker image rm mc && docker images prune
+docker stop mc && docker rm mc && docker image rm mc && docker image prune
 ```
 
 ```
@@ -88,7 +88,7 @@ docker run -d \
 ```
 Remove
 ```
-docker stop mc && docker rm mc && docker image rm mc && docker images prune && docker volume rm mc
+docker stop mc && docker rm mc && docker image rm mc && docker image prune && docker volume rm mc
 ```
 
 ### Push to docker hub

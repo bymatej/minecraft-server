@@ -5,7 +5,7 @@ LABEL maintainer="programming@bymatej.com"
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Environment variables used for setting up the system
-ENV JAVA_MAJOR_VERSION=17
+ENV JAVA_MAJOR_VERSION=21
 
 # Environment variables used for Mod installation
 ENV MINECRAFT_FLAVOR="Vanilla"
@@ -80,8 +80,7 @@ RUN chmod a+x /chromedriver/chromedriver && \
 # Update and install required software and tools
 RUN echo "***** Updating and installing required software and tools" && \
     apt --assume-yes update && \
-    apt --assume-yes install openjdk-$JAVA_MAJOR_VERSION-jre-headless \
-                             wget \
+    apt --assume-yes install wget \
                              zip \
                              unzip \
                              python3 \
@@ -96,7 +95,20 @@ RUN echo "***** Updating and installing required software and tools" && \
                              chromium \
                              nano \
                              mono-complete \
-                             xvfb
+                             xvfb \
+                             gnupg \
+                             apt-transport-https \
+                             && rm -rf /var/lib/apt/lists/* && \
+    wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | \
+    gpg --dearmor | tee /usr/share/keyrings/adoptium.gpg > /dev/null && \
+    echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb bookworm main" \
+    > /etc/apt/sources.list.d/adoptium.list && \
+    apt --assume-yes update && \
+    apt --assume-yes install temurin-$JAVA_MAJOR_VERSION-jre && \
+    apt autoremove && \
+    apt autoclean && \
+    rm -rf /var/lib/apt/lists/*
+
 
 # Install Python dependencies
 ADD scripts/requirements.txt /scripts/requirements.txt
