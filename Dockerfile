@@ -1,21 +1,39 @@
-FROM debian:bookworm
-
-LABEL maintainer="programming@bymatej.com"
+# Stage 1: Build Spigot
+FROM debian:bookworm-slim AS spigot-builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Environment variables used for setting up the system
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget unzip git ca-certificates gnupg apt-transport-https && \
+    wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | \
+    gpg --dearmor | tee /usr/share/keyrings/adoptium.gpg > /dev/null && \
+    echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb bookworm main" \
+    > /etc/apt/sources.list.d/adoptium.list && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    temurin-21-jdk maven && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME=/usr/lib/jvm/java-21-temurin-amd64
+ENV PATH="$JAVA_HOME/bin:$PATH"
+
+WORKDIR /spigot
+RUN wget -O BuildTools.jar https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar --no-check-certificate && \
+    java -jar BuildTools.jar --rev latest && \
+    rm -rf ~/.m2 /root/.m2
+
+
+
+# Stage 2: Final image
+FROM debian:bookworm-slim
+
+LABEL maintainer="programming@bymatej.com"
+ARG DEBIAN_FRONTEND=noninteractive
+
 ENV JAVA_MAJOR_VERSION=21
-
-# Environment variables used for Mod installation
-ENV MINECRAFT_FLAVOR="Vanilla"
-ENV MINECRAFT_VERSION=latest
-
-# Environment variables used for initialising McMyAdmin
-ENV MCMA_PASSWORD=nimda
-
-# Environment variables used in McMyAdmin.conf
-ENV WEBSERVER_PORT=8080 \
+ENV MINECRAFT_FLAVOR="Vanilla" \
+    MINECRAFT_VERSION=latest \
+    MCMA_PASSWORD=nimda \
+    WEBSERVER_PORT=8080 \
     JAVA_PATH=detect \
     JAVA_MEMORY=1024 \
     JAVA_GC=default \
@@ -72,117 +90,91 @@ ENV ENABLE_JMX_MONITORING=false \
     SPAWN_PROTECTION=16 \
     MAX_WORLD_SIZE=29999984
 
-# Setup gecko driver
-ADD chromedriver /chromedriver/chromedriver
-RUN chmod a+x /chromedriver/chromedriver && \
-    export PATH=$PATH:/chromedriver
-
-# Update and install required software and tools
-RUN echo "***** Updating and installing required software and tools" && \
-    apt --assume-yes update && \
-    apt --assume-yes install wget \
-                             zip \
-                             unzip \
-                             python3 \
-                             python3-pip \
-                             locales \
-                             ca-certificates \
-                             curl \
-                             git \
-                             screen \
-                             dumb-init \
-                             gosu \
-                             chromium \
-                             nano \
-                             mono-complete \
-                             xvfb \
-                             gnupg \
-                             apt-transport-https \
-                             && rm -rf /var/lib/apt/lists/* && \
+# Install core tools, dependencies, installed Java, add cleanup step
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    wget \
+    unzip \
+    python3 \
+    python3-pip \
+    locales \
+    ca-certificates \
+    curl \
+    git \
+    screen \
+    dumb-init \
+    chromium \
+    gosu \
+    nano \
+    gnupg \
+    apt-transport-https \
+    mono-runtime \
+    xvfb \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libglib2.0-0 && \
     wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | \
     gpg --dearmor | tee /usr/share/keyrings/adoptium.gpg > /dev/null && \
     echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb bookworm main" \
     > /etc/apt/sources.list.d/adoptium.list && \
-    apt --assume-yes update && \
-    apt --assume-yes install temurin-$JAVA_MAJOR_VERSION-jre && \
-    apt autoremove && \
+    apt update && \
+    apt install -y --no-install-recommends temurin-${JAVA_MAJOR_VERSION}-jre && \
     apt autoclean && \
-    rm -rf /var/lib/apt/lists/*
-
-
-# Install Python dependencies
-ADD scripts/requirements.txt /scripts/requirements.txt
-RUN pip3 install -r /scripts/requirements.txt --break-system-packages
-
-# General system setup
-RUN echo "***** Running general system setup" && \
+    apt autoremove && \
+    rm -rf /var/lib/apt/lists/* && \
     sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     dpkg-reconfigure --frontend=noninteractive locales && \
     update-locale LANG=en_US.UTF-8
 
-# Set JAVA_HOME environment variable
-ENV JAVA_HOME=/usr/lib/jvm/java-$JAVA_MAJOR_VERSION-openjdk-amd64/jre/bin/java
-RUN echo "***** Setting JAVA_HOME environment variable" && \
-    echo "JAVA_HOME=/usr/lib/jvm/java-$JAVA_MAJOR_VERSION-openjdk-amd64/jre/bin/java" >> /etc/profile && \
-    echo "PATH=$PATH:$HOME/bin:$JAVA_HOME/bin" >> /etc/profile && \
-    echo "export JAVA_HOME" >> /etc/profile && \
-    echo "export JRE_HOME" >> /etc/profile && \
-    echo "export PATH" >> /etc/profile
+ENV LANG=en_US.UTF-8 \
+    JAVA_HOME=/usr/lib/jvm/java-${JAVA_MAJOR_VERSION}-temurin-amd64 \
+    PATH="/usr/lib/jvm/java-${JAVA_MAJOR_VERSION}-temurin-amd64/bin:$PATH"
 
-# Download and install Mono for McMyAdmin
+# Setup McMyAdmin
 WORKDIR /usr/local
 RUN wget http://mcmyadmin.com/Downloads/etc.zip --no-check-certificate && \
     unzip etc.zip && \
     rm etc.zip
 
-# Download McMyAdmin
 WORKDIR /McMyAdmin
 RUN wget http://mcmyadmin.com/Downloads/MCMA2_glibc26_2.zip --no-check-certificate && \
     unzip MCMA2_glibc26_2.zip && \
-    rm MCMA2_glibc26_2.zip
-
-# Run initial setup for McMyAdmin
-RUN /McMyAdmin/MCMA2_Linux_x86_64 -setpass $MCMA_PASSWORD -configonly -nonotice
+    rm MCMA2_glibc26_2.zip && \
+    ./MCMA2_Linux_x86_64 -setpass "$MCMA_PASSWORD" -configonly -nonotice
 
 # Agree to EULA
 RUN echo "***** Agreeing to MCMA's EULA: https://mcmyadmin.com/licence.html" && \
     touch /McMyAdmin/Minecraft/eula.txt && \
     echo "eula=true" >> /McMyAdmin/Minecraft/eula.txt
 
-# Add McMyAdmin config script
-ADD scripts/configure_mcma.py /scripts/
+# Copy spigot server from builder
+COPY --from=spigot-builder /spigot/spigot-*.jar /McMyAdmin/Minecraft/spigot/
 
-# Download Spigot BuildTools
-WORKDIR /McMyAdmin/Minecraft/spigot/
-RUN echo "***** Downloading Spigot BuildTools. Installation will happen on container start." && \
-    wget -O BuildTools.jar https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar --no-check-certificate
+# Add scripts and configs
+COPY scripts/requirements.txt /scripts/
+RUN pip3 install --no-cache-dir --break-system-packages -r /scripts/requirements.txt
 
-# Add default Minecraft server.properties
-ADD files/server.properties /McMyAdmin/Minecraft/server.properties
+COPY scripts/ /scripts/
+COPY files/server.properties /McMyAdmin/Minecraft/server.properties
 
-# Add Minecraft server config script
-ADD scripts/configure_minecraft.py /scripts/
+# Setup chromedriver (optional; remove if not used)
+COPY chromedriver /chromedriver/chromedriver
+RUN chmod a+x /chromedriver/chromedriver && \
+    ln -s /chromedriver/chromedriver /usr/local/bin/chromedriver
 
-# Cleanup
-RUN echo "***** Cleaning up" && \
-    apt --assume-yes clean && \
-    apt --assume-yes autoclean && \
-    apt --assume-yes autoremove && \
-    rm -rf \
-           /tmp/* \
-           /var/lib/apt/lists/* \
-           /var/tmp/*
+# Final cleanup
+RUN apt-get purge -y gnupg && \
+    apt-get clean && \
+    rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/*
 
-# Expose ports
+# Ports and volumes
 EXPOSE 8080 25565
-
-# Define volumes
-WORKDIR /McMyAdmin/
 VOLUME /McMyAdmin/
+WORKDIR /McMyAdmin/
 
-# Start
-ADD scripts/ /scripts/
-RUN chmod a+x /scripts/startup.sh && \
-    chmod a+x /scripts/entrypoint.sh
+# Startup
+RUN chmod +x /scripts/startup.sh /scripts/entrypoint.sh
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["/scripts/startup.sh"]
