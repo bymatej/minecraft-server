@@ -14,7 +14,7 @@ I created this for my own personal use. I use it for fun on my "hacked" server.
 If you are not happy with the solution provided here, do one of the following: 
 - Create a pull request with desired changes on this project and I will consider it
 - Fork this project and modify it
-- Write me an email at matej.jelic92@gmail.com and tell me what would you like me to change (don't expect me to do it if I don't think it's worth it, or if I don't find the time to do it)
+- Open a GitHub issue and tell me what would you like me to change (don't expect me to do it if I don't think it's worth it, or if I don't find the time to do it)
 - Use it the way I use it and don't complain
 - Check other solutions, like this one, for example: https://github.com/tekgator/docker-mcmyadmin
 
